@@ -1,0 +1,63 @@
+# Importing necessary libraries
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Generating a synthetic Titanic-like dataset
+np.random.seed(42)
+
+# Number of samples
+n_samples = 1000
+
+# Synthetic data generation
+data = pd.DataFrame({
+    'Pclass': np.random.choice([1, 2, 3], size=n_samples, p=[0.2, 0.3, 0.5]),
+    'Sex': np.random.choice([0, 1], size=n_samples, p=[0.5, 0.5]),  # 0: Male, 1: Female
+    'Age': np.random.randint(1, 80, size=n_samples),  # Age range from 1 to 80
+    'SibSp': np.random.randint(0, 5, size=n_samples),  # Siblings/Spouses aboard
+    'Parch': np.random.randint(0, 5, size=n_samples),  # Parents/Children aboard
+    'Fare': np.random.uniform(10, 100, size=n_samples),  # Ticket fare
+    'Embarked': np.random.choice([0, 1, 2], size=n_samples, p=[0.4, 0.3, 0.3]),  # Embarked C, Q, S
+    'Survived': np.random.choice([0, 1], size=n_samples, p=[0.6, 0.4])  # Survival (0: No, 1: Yes)
+})
+
+# Displaying first few rows
+print("Synthetic Dataset Preview:")
+print(data.head())
+
+# Define features and target variable
+X = data.drop(['Survived'], axis=1)
+y = data['Survived']
+
+# Split the dataset into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model Building
+print("\nBuilding Model...")
+model = RandomForestClassifier(n_estimators=100, random_state=42)
+model.fit(X_train, y_train)
+
+# Predictions
+y_pred = model.predict(X_test)
+
+# Evaluation
+print("\nModel Evaluation:")
+print(f"Accuracy: {accuracy_score(y_test, y_pred):.2f}")
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred))
+print("\nConfusion Matrix:")
+sns.heatmap(confusion_matrix(y_test, y_pred), annot=True, fmt='d', cmap='Blues')
+plt.xlabel('Predicted')
+plt.ylabel('Actual')
+plt.title('Confusion Matrix')
+plt.show()
+
+# Feature Importance
+print("\nFeature Importance:")
+importance = pd.Series(model.feature_importances_, index=X.columns)
+importance.sort_values(ascending=False).plot(kind='bar', title='Feature Importance')
+plt.show()
