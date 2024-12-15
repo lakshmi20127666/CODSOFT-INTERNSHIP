@@ -1,0 +1,55 @@
+import pandas as pd
+import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+
+# Load the Iris dataset
+data = load_iris()
+iris_df = pd.DataFrame(data=data.data, columns=data.feature_names)
+iris_df['species'] = data.target
+
+# Map numerical target to species names
+species_map = {0: 'setosa', 1: 'versicolor', 2: 'virginica'}
+iris_df['species'] = iris_df['species'].map(species_map)
+
+# Display dataset information
+print("First 5 rows of the dataset:")
+print(iris_df.head())
+
+# Features (X) and target (y)
+X = data.data
+y = data.target
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# Initialize and train the model
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Make predictions
+y_pred = model.predict(X_test)
+# Evaluate the model
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {accuracy * 100:.2f}%")
+print("\nClassification Report:")
+print(classification_report(y_test, y_pred, target_names=data.target_names))
+
+# Visualize the dataset with PCA
+pca = PCA(n_components=2)
+X_pca = pca.fit_transform(X)
+
+plt.figure(figsize=(8, 6))
+colors = ['red', 'blue', 'green']
+for i, species in enumerate(species_map.values()):
+    plt.scatter(X_pca[y == i, 0], X_pca[y == i, 1], label=species, color=colors[i], alpha=0.7)
+
+plt.title('Iris Dataset PCA Visualization')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.legend()
+plt.show()
